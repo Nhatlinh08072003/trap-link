@@ -1,3 +1,4 @@
+
 // "use client";
 // import React, { useState, useEffect } from 'react';
 // import { ChevronLeft, ChevronRight, Heart, Eye } from 'lucide-react';
@@ -247,9 +248,16 @@
 //       setImageSrc(FALLBACK_IMAGE);
 //     };
 
-//     // Handle click to redirect to Shopee link
+//     // Handle click to open Shopee app or fallback to URL
 //     const handleCardClick = () => {
-//       window.location.href = 'https://s.shopee.vn/8pbRHDEKXp';
+//       const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
+//       const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
+
+//       // Try deep link, fallback to URL if app not installed
+//       window.location.href = shopeeDeepLink;
+//       setTimeout(() => {
+//         window.location.href = fallbackUrl;
+//       }, 500); // Delay to allow app to open
 //     };
 
 //     return (
@@ -308,7 +316,14 @@
 
 //   // Carousel button click handler
 //   const handleCarouselClick = () => {
-//     window.location.href = 'https://s.shopee.vn/8pbRHDEKXp';
+//     const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
+//     const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
+
+//     // Try deep link, fallback to URL if app not installed
+//     window.location.href = shopeeDeepLink;
+//     setTimeout(() => {
+//       window.location.href = fallbackUrl;
+//     }, 500); // Delay to allow app to open
 //   };
 
 //   return (
@@ -734,15 +749,21 @@ const MangaHomepage: React.FC = () => {
       setImageSrc(FALLBACK_IMAGE);
     };
 
-    // Handle click to open Shopee app or fallback to URL
+    // Handle click to open Shopee app with platform-specific handling
     const handleCardClick = () => {
       const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
       const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
 
-      // Try deep link, fallback to URL if app not installed
+      // Try deep link
       window.location.href = shopeeDeepLink;
+
+      // Fallback for Safari/iOS with forced deep link parameter
       setTimeout(() => {
-        window.location.href = fallbackUrl;
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+          window.location.href = `${fallbackUrl}&af_force_deeplink=true`;
+        } else {
+          window.location.href = fallbackUrl;
+        }
       }, 500); // Delay to allow app to open
     };
 
@@ -805,10 +826,16 @@ const MangaHomepage: React.FC = () => {
     const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
     const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
 
-    // Try deep link, fallback to URL if app not installed
+    // Try deep link
     window.location.href = shopeeDeepLink;
+
+    // Fallback for Safari/iOS with forced deep link parameter
     setTimeout(() => {
-      window.location.href = fallbackUrl;
+      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+        window.location.href = `${fallbackUrl}&af_force_deeplink=true`;
+      } else {
+        window.location.href = fallbackUrl;
+      }
     }, 500); // Delay to allow app to open
   };
 
