@@ -760,26 +760,12 @@ const MangaHomepage: React.FC = () => {
       const isChrome = /Chrome/.test(navigator.userAgent);
       
       if (isIOS && isSafari && !isChrome) {
-        // For Safari on iOS - try different approach
-        try {
-          // Method 1: Create invisible iframe
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = shopeeDeepLink;
-          document.body.appendChild(iframe);
-          
-          // Clean up and fallback
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-            // If still on page, open web version
-            if (!document.hidden) {
-              window.open(fallbackUrl, '_blank');
-            }
-          }, 1000);
-        } catch (error) {
-          // Fallback to direct web link
-          window.open(fallbackUrl, '_blank');
-        }
+        // For Safari on iOS - simplified approach
+        window.location.href = shopeeDeepLink;
+        // Quick fallback for Safari
+        setTimeout(() => {
+          window.location.href = fallbackUrl;
+        }, 1000);
       } else if (isIOS) {
         // For Chrome on iOS or other browsers
         window.location.href = shopeeDeepLink;
@@ -864,26 +850,12 @@ const MangaHomepage: React.FC = () => {
     const isChrome = /Chrome/.test(navigator.userAgent);
     
     if (isIOS && isSafari && !isChrome) {
-      // For Safari on iOS - try different approach
-      try {
-        // Method 1: Create invisible iframe
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = shopeeDeepLink;
-        document.body.appendChild(iframe);
-        
-        // Clean up and fallback
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          // If still on page, open web version
-          if (!document.hidden) {
-            window.open(fallbackUrl, '_blank');
-          }
-        }, 1000);
-      } catch (error) {
-        // Fallback to direct web link
-        window.open(fallbackUrl, '_blank');
-      }
+      // For Safari on iOS - simplified approach
+      window.location.href = shopeeDeepLink;
+      // Quick fallback for Safari
+      setTimeout(() => {
+        window.location.href = fallbackUrl;
+      }, 1000);
     } else if (isIOS) {
       // For Chrome on iOS or other browsers
       window.location.href = shopeeDeepLink;
