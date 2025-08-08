@@ -749,22 +749,33 @@ const MangaHomepage: React.FC = () => {
       setImageSrc(FALLBACK_IMAGE);
     };
 
-    // Handle click to open Shopee app with platform-specific handling
+    // Handle click to open Shopee app or fallback to URL
     const handleCardClick = () => {
       const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
       const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
-
-      // Try deep link
-      window.location.href = shopeeDeepLink;
-
-      // Fallback for Safari/iOS with forced deep link parameter
-      setTimeout(() => {
-        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-          window.location.href = `${fallbackUrl}&af_force_deeplink=true`;
-        } else {
+      
+      // Check if it's iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // For iOS, try app first, then fallback to web
+        window.location.href = shopeeDeepLink;
+        setTimeout(() => {
           window.location.href = fallbackUrl;
-        }
-      }, 500); // Delay to allow app to open
+        }, 2000); // Longer timeout for iOS
+      } else {
+        // For Android and other browsers
+        const startTime = Date.now();
+        window.location.href = shopeeDeepLink;
+        
+        // Check if app opened by measuring time
+        setTimeout(() => {
+          if (Date.now() - startTime < 1000) {
+            // App didn't open, go to web
+            window.location.href = fallbackUrl;
+          }
+        }, 800);
+      }
     };
 
     return (
@@ -826,17 +837,28 @@ const MangaHomepage: React.FC = () => {
     const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
     const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
 
-    // Try deep link
-    window.location.href = shopeeDeepLink;
-
-    // Fallback for Safari/iOS with forced deep link parameter
-    setTimeout(() => {
-      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-        window.location.href = `${fallbackUrl}&af_force_deeplink=true`;
-      } else {
+    // Check if it's iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    if (isIOS) {
+      // For iOS, try app first, then fallback to web
+      window.location.href = shopeeDeepLink;
+      setTimeout(() => {
         window.location.href = fallbackUrl;
-      }
-    }, 500); // Delay to allow app to open
+      }, 2000); // Longer timeout for iOS
+    } else {
+      // For Android and other browsers
+      const startTime = Date.now();
+      window.location.href = shopeeDeepLink;
+      
+      // Check if app opened by measuring time
+      setTimeout(() => {
+        if (Date.now() - startTime < 1000) {
+          // App didn't open, go to web
+          window.location.href = fallbackUrl;
+        }
+      }, 800);
+    }
   };
 
   return (
