@@ -522,6 +522,13 @@ const FALLBACK_IMAGE = 'https://via.placeholder.com/300x400?text=No+Image';
 
 const MangaHomepage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isIOS, setIsIOS] = useState(false);
+
+  // Detect iOS Safari on component mount
+  useEffect(() => {
+    const ua = window.navigator.userAgent;
+    setIsIOS(/iPad|iPhone|iPod/.test(ua) && /Safari/i.test(ua) && !/CriOS/i.test(ua));
+  }, []);
 
   // List of image filenames provided
   const imageFilenames = [
@@ -570,7 +577,6 @@ const MangaHomepage: React.FC = () => {
   ];
 
   const popularMangas: Manga[] = [
-    // "TIỂU THUYẾT CÓ THỂ BAN THÍCH" section
     {
       id: 4,
       title: "Em Còn Muốn Nữa Không",
@@ -616,7 +622,6 @@ const MangaHomepage: React.FC = () => {
   ];
 
   const hotMangas: Manga[] = [
-    // "AI CŨNG THÍCH ĐỌC" section
     {
       id: 10,
       title: "Thiếu Nữ Thư Ngây",
@@ -668,7 +673,6 @@ const MangaHomepage: React.FC = () => {
   ];
 
   const fullMangas: Manga[] = [
-    // "TRUYỆN FULL" section
     {
       id: 16,
       title: "Em Còn Muốn Nữa Không",
@@ -727,62 +731,49 @@ const MangaHomepage: React.FC = () => {
     return () => clearInterval(interval);
   }, [featuredMangas.length]);
 
-  // Navigate to the next slide
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % featuredMangas.length);
   };
 
-  // Navigate to the previous slide
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + featuredMangas.length) % featuredMangas.length);
   };
 
-  // Manga card component with redirect on click
+  // Improved click handler with Universal Links support
+  const handleCardClick = () => {
+    const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
+    const universalLink = 'https://s.shopee.vn/8pbRHDEKXp';
+    const appStoreLink = 'https://apps.apple.com/vn/app/shopee/id959841443';
+
+    if (isIOS) {
+      // Try Universal Link first (will auto-open app if installed)
+      window.location.href = universalLink;
+      
+      // Fallback to App Store if app not installed
+      setTimeout(() => {
+        if (!document.hidden) {
+          window.location.href = appStoreLink;
+        }
+      }, 500);
+    } else {
+      // For other browsers, try deep link then fallback to web
+      window.location.href = shopeeDeepLink;
+      setTimeout(() => {
+        if (!document.hidden) {
+          window.location.href = universalLink;
+        }
+      }, 500);
+    }
+  };
+
   const MangaCard: React.FC<{ manga: Manga; showDescription?: boolean }> = ({ 
     manga, 
     showDescription = false 
   }) => {
     const [imageSrc, setImageSrc] = useState(manga.cover);
 
-    // Handle image load error
     const handleImageError = () => {
       setImageSrc(FALLBACK_IMAGE);
-    };
-
-    // Handle click to open Shopee app or fallback to URL
-    const handleCardClick = () => {
-      const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
-      const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
-      
-      // Check browser type
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      const isChrome = /Chrome/.test(navigator.userAgent);
-      
-      if (isIOS && isSafari && !isChrome) {
-        // For Safari on iOS - simplified approach
-        window.location.href = shopeeDeepLink;
-        // Quick fallback for Safari
-        setTimeout(() => {
-          window.location.href = fallbackUrl;
-        }, 1000);
-      } else if (isIOS) {
-        // For Chrome on iOS or other browsers
-        window.location.href = shopeeDeepLink;
-        setTimeout(() => {
-          window.location.href = fallbackUrl;
-        }, 1500);
-      } else {
-        // For Android and other browsers
-        const startTime = Date.now();
-        window.location.href = shopeeDeepLink;
-        
-        setTimeout(() => {
-          if (Date.now() - startTime < 1000) {
-            window.location.href = fallbackUrl;
-          }
-        }, 800);
-      }
     };
 
     return (
@@ -829,7 +820,6 @@ const MangaHomepage: React.FC = () => {
     );
   };
 
-  // Section header component
   const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
     <div className="flex items-center justify-between mb-6">
       <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -839,44 +829,25 @@ const MangaHomepage: React.FC = () => {
     </div>
   );
 
-  // Carousel button click handler
   const handleCarouselClick = () => {
-    const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
-    const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
-
-    // Check browser type
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isChrome = /Chrome/.test(navigator.userAgent);
-    
-    if (isIOS && isSafari && !isChrome) {
-      // For Safari on iOS - simplified approach
-      window.location.href = shopeeDeepLink;
-      // Quick fallback for Safari
-      setTimeout(() => {
-        window.location.href = fallbackUrl;
-      }, 1000);
-    } else if (isIOS) {
-      // For Chrome on iOS or other browsers
-      window.location.href = shopeeDeepLink;
-      setTimeout(() => {
-        window.location.href = fallbackUrl;
-      }, 1500);
-    } else {
-      // For Android and other browsers
-      const startTime = Date.now();
-      window.location.href = shopeeDeepLink;
-      
-      setTimeout(() => {
-        if (Date.now() - startTime < 1000) {
-          window.location.href = fallbackUrl;
-        }
-      }, 800);
-    }
+    handleCardClick(); // Reuse the same click handler
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* iOS Notice Banner */}
+      {isIOS && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <strong>Lưu ý dành cho iOS:</strong> Khi nhấn vào truyện, hãy chọn "Mở" trong hộp thoại Safari để vào nhóm Shopee nhanh nhất.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -940,28 +911,32 @@ const MangaHomepage: React.FC = () => {
             </div>
           </div>
           
-          {/* Navigation buttons */}
           <button 
-            onClick={prevSlide}
+            onClick={(e) => {
+              e.stopPropagation();
+              prevSlide();
+            }}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button 
-            onClick={nextSlide}
+            onClick={(e) => {
+              e.stopPropagation();
+              nextSlide();
+            }}
             className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
           
-          {/* Slide indicators */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30 flex gap-2">
             {featuredMangas.map((_, index) => (
               <button
                 key={index}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setCurrentSlide(index);
-                  handleCarouselClick();
                 }}
                 className={`w-3 h-3 rounded-full transition-colors ${
                   currentSlide === index ? 'bg-white' : 'bg-white/50'
@@ -973,7 +948,6 @@ const MangaHomepage: React.FC = () => {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 space-y-12 pb-12">
-        {/* TIỂU THUYẾT CÓ THỂ BAN THÍCH Section */}
         <section>
           <SectionHeader title="TIỂU THUYẾT CÓ THỂ BAN THÍCH" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -983,7 +957,6 @@ const MangaHomepage: React.FC = () => {
           </div>
         </section>
 
-        {/* AI CŨNG THÍCH ĐỌC Section */}
         <section>
           <SectionHeader title="AI CŨNG THÍCH ĐỌC" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -993,7 +966,6 @@ const MangaHomepage: React.FC = () => {
           </div>
         </section>
 
-        {/* TRUYỆN FULL Section */}
         <section>
           <SectionHeader title="TRUYỆN FULL" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -1004,7 +976,6 @@ const MangaHomepage: React.FC = () => {
         </section>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
