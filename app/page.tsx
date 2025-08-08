@@ -754,24 +754,45 @@ const MangaHomepage: React.FC = () => {
       const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
       const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
       
-      // Check if it's iOS
+      // Check browser type
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const isChrome = /Chrome/.test(navigator.userAgent);
       
-      if (isIOS) {
-        // For iOS, try app first, then fallback to web
+      if (isIOS && isSafari && !isChrome) {
+        // For Safari on iOS - try different approach
+        try {
+          // Method 1: Create invisible iframe
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = shopeeDeepLink;
+          document.body.appendChild(iframe);
+          
+          // Clean up and fallback
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+            // If still on page, open web version
+            if (!document.hidden) {
+              window.open(fallbackUrl, '_blank');
+            }
+          }, 1000);
+        } catch (error) {
+          // Fallback to direct web link
+          window.open(fallbackUrl, '_blank');
+        }
+      } else if (isIOS) {
+        // For Chrome on iOS or other browsers
         window.location.href = shopeeDeepLink;
         setTimeout(() => {
           window.location.href = fallbackUrl;
-        }, 2000); // Longer timeout for iOS
+        }, 1500);
       } else {
         // For Android and other browsers
         const startTime = Date.now();
         window.location.href = shopeeDeepLink;
         
-        // Check if app opened by measuring time
         setTimeout(() => {
           if (Date.now() - startTime < 1000) {
-            // App didn't open, go to web
             window.location.href = fallbackUrl;
           }
         }, 800);
@@ -837,24 +858,45 @@ const MangaHomepage: React.FC = () => {
     const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
     const fallbackUrl = 'https://s.shopee.vn/8pbRHDEKXp';
 
-    // Check if it's iOS
+    // Check browser type
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isChrome = /Chrome/.test(navigator.userAgent);
     
-    if (isIOS) {
-      // For iOS, try app first, then fallback to web
+    if (isIOS && isSafari && !isChrome) {
+      // For Safari on iOS - try different approach
+      try {
+        // Method 1: Create invisible iframe
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = shopeeDeepLink;
+        document.body.appendChild(iframe);
+        
+        // Clean up and fallback
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          // If still on page, open web version
+          if (!document.hidden) {
+            window.open(fallbackUrl, '_blank');
+          }
+        }, 1000);
+      } catch (error) {
+        // Fallback to direct web link
+        window.open(fallbackUrl, '_blank');
+      }
+    } else if (isIOS) {
+      // For Chrome on iOS or other browsers
       window.location.href = shopeeDeepLink;
       setTimeout(() => {
         window.location.href = fallbackUrl;
-      }, 2000); // Longer timeout for iOS
+      }, 1500);
     } else {
       // For Android and other browsers
       const startTime = Date.now();
       window.location.href = shopeeDeepLink;
       
-      // Check if app opened by measuring time
       setTimeout(() => {
         if (Date.now() - startTime < 1000) {
-          // App didn't open, go to web
           window.location.href = fallbackUrl;
         }
       }, 800);
