@@ -503,8 +503,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Eye } from 'lucide-react';
+import Image from 'next/image';
 
-// Interface for manga data
 interface Manga {
   id: number;
   title: string;
@@ -517,20 +517,17 @@ interface Manga {
   isHot?: boolean;
 }
 
-// Fallback image URL for broken images
 const FALLBACK_IMAGE = 'https://via.placeholder.com/300x400?text=No+Image';
 
 const MangaHomepage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isIOS, setIsIOS] = useState(false);
 
-  // Detect iOS Safari on component mount
   useEffect(() => {
     const ua = window.navigator.userAgent;
     setIsIOS(/iPad|iPhone|iPod/.test(ua) && /Safari/i.test(ua) && !/CriOS/i.test(ua));
   }, []);
 
-  // List of image filenames provided
   const imageFilenames = [
     "482125061_122198253848104763_569734162814439841_n.jpg",
     "517380711_1845835563007930_6336123526310484926_n.jpg",
@@ -547,7 +544,6 @@ const MangaHomepage: React.FC = () => {
     "529847336_122136470546835772_629124533003977685_n.jpg"
   ];
 
-  // Sample data with your images
   const featuredMangas: Manga[] = [
     {
       id: 1,
@@ -723,7 +719,6 @@ const MangaHomepage: React.FC = () => {
     }
   ];
 
-  // Auto slide effect for the carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featuredMangas.length);
@@ -739,24 +734,19 @@ const MangaHomepage: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + featuredMangas.length) % featuredMangas.length);
   };
 
-  // Improved click handler with Universal Links support
   const handleCardClick = () => {
     const shopeeDeepLink = `shopee://open?url=https://s.shopee.vn/8pbRHDEKXp`;
     const universalLink = 'https://s.shopee.vn/8pbRHDEKXp';
     const appStoreLink = 'https://apps.apple.com/vn/app/shopee/id959841443';
 
     if (isIOS) {
-      // Try Universal Link first (will auto-open app if installed)
       window.location.href = universalLink;
-      
-      // Fallback to App Store if app not installed
       setTimeout(() => {
         if (!document.hidden) {
           window.location.href = appStoreLink;
         }
       }, 500);
     } else {
-      // For other browsers, try deep link then fallback to web
       window.location.href = shopeeDeepLink;
       setTimeout(() => {
         if (!document.hidden) {
@@ -772,8 +762,9 @@ const MangaHomepage: React.FC = () => {
   }) => {
     const [imageSrc, setImageSrc] = useState(manga.cover);
 
-    const handleImageError = () => {
-      setImageSrc(FALLBACK_IMAGE);
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const target = e.target as HTMLImageElement;
+      target.src = FALLBACK_IMAGE;
     };
 
     return (
@@ -781,20 +772,20 @@ const MangaHomepage: React.FC = () => {
         className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group relative"
         onClick={handleCardClick}
       >
-        <div className="relative">
-          <img 
-            src={imageSrc} 
+        <div className="relative w-full aspect-[3/4]">
+          <Image
+            src={imageSrc}
             alt={manga.title}
-            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             onError={handleImageError}
-            loading="lazy"
+            unoptimized
           />
           {manga.isHot && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold z-10">
               HOT
             </div>
           )}
-          <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 z-0"></div>
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-gray-800 text-sm mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
@@ -830,25 +821,23 @@ const MangaHomepage: React.FC = () => {
   );
 
   const handleCarouselClick = () => {
-    handleCardClick(); // Reuse the same click handler
+    handleCardClick();
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* iOS Notice Banner */}
       {isIOS && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
           <div className="flex">
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                <strong>Lưu ý dành cho iOS:</strong> Khi nhấn vào truyện, hãy chọn "Mở" trong hộp thoại Safari để vào nhóm Shopee nhanh nhất.
+                <strong>Lưu ý dành cho iOS:</strong> Khi nhấn vào truyện, hãy chọn &quot;Mở&quot; trong hộp thoại Safari để vào nhóm Shopee nhanh nhất.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -874,19 +863,22 @@ const MangaHomepage: React.FC = () => {
         </div>
       </header>
 
-      {/* Featured Carousel */}
       <section className="relative max-w-7xl mx-auto px-4 py-8">
         <div 
           className="relative h-80 rounded-xl overflow-hidden shadow-lg"
           onClick={handleCarouselClick}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent z-10"></div>
-          <img 
+          <Image
             src={featuredMangas[currentSlide].cover}
             alt={featuredMangas[currentSlide].title}
-            className="w-full h-full object-cover"
-            onError={(e) => (e.currentTarget.src = FALLBACK_IMAGE)}
-            loading="lazy"
+            fill
+            className="object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = FALLBACK_IMAGE;
+            }}
+            unoptimized
           />
           <div className="absolute inset-0 z-20 flex items-center">
             <div className="max-w-xl ml-8 text-white">
@@ -904,7 +896,10 @@ const MangaHomepage: React.FC = () => {
               </div>
               <button 
                 className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors"
-                onClick={handleCarouselClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCarouselClick();
+                }}
               >
                 🧡 Vào nhóm để đọc truyện sớm + giao lưu cùng fan!
               </button>
